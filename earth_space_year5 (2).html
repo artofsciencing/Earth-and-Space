@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚀 Earth & Space Explorer — Year 5</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --space-dark: #050a1a;
+    --space-navy: #0b1535;
+    --space-mid: #112050;
+    --accent-yellow: #ffd54f;
+    --accent-orange: #ff8c42;
+    --accent-blue: #4fc3f7;
+    --accent-green: #69f0ae;
+    --accent-pink: #f48fb1;
+    --text-light: #e8f4ff;
+    --text-dim: #8ab4d4;
+    --card-bg: rgba(255,255,255,0.06);
+    --card-border: rgba(255,255,255,0.12);
+    --tab-active: #4fc3f7;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--space-dark);
+    color: var(--text-light);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── STARFIELD ── */
+  #stars-canvas {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    pointer-events:none; z-index:0;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: relative; z-index:10;
+    text-align: center;
+    padding: 28px 20px 10px;
+    background: linear-gradient(180deg, rgba(5,10,26,0.98) 0%, transparent 100%);
+  }
+  .header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    color: var(--accent-yellow);
+    text-shadow: 0 0 30px rgba(255,213,79,0.5), 0 2px 0 rgba(0,0,0,0.5);
+    letter-spacing: 1px;
+  }
+  .header p {
+    font-size: 0.95rem; color: var(--text-dim); margin-top:4px;
+  }
+
+  /* ── XP BAR ── */
+  .xp-strip {
+    position: relative; z-index:10;
+    display: flex; align-items:center; justify-content:center; gap:14px;
+    padding: 10px 20px 14px;
+    flex-wrap: wrap;
+  }
+  .xp-badge {
+    background: linear-gradient(135deg,#1a2a50,#0e1a3a);
+    border: 2px solid var(--accent-yellow);
+    border-radius: 40px;
+    padding: 6px 18px;
+    font-family:'Fredoka One',cursive;
+    font-size:1rem; color: var(--accent-yellow);
+    display:flex; align-items:center; gap:6px;
+    box-shadow: 0 0 14px rgba(255,213,79,0.25);
+  }
+  .xp-bar-wrap {
+    flex:1; max-width:260px;
+    background: rgba(255,255,255,0.1); border-radius:20px; height:14px;
+    overflow:hidden; border:1px solid rgba(255,255,255,0.15);
+  }
+  .xp-bar-fill {
+    height:100%; border-radius:20px;
+    background: linear-gradient(90deg,#ffd54f,#ff8c42);
+    transition: width 0.6s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 0 0 10px rgba(255,180,0,0.5);
+  }
+  .rank-badge {
+    font-family:'Fredoka One',cursive; font-size:0.9rem;
+    background: linear-gradient(135deg,#1a3a50,#0e2a3a);
+    border:2px solid var(--accent-blue);
+    border-radius:30px; padding:5px 14px; color:var(--accent-blue);
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    position: relative; z-index:10;
+    display:flex; justify-content:center; gap:8px;
+    padding: 0 16px 14px; flex-wrap:wrap;
+  }
+  .tab-btn {
+    font-family:'Fredoka One',cursive; font-size:1rem;
+    background: rgba(255,255,255,0.07);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 50px; padding: 8px 22px;
+    color: var(--text-dim); cursor:pointer;
+    transition: all 0.25s ease;
+  }
+  .tab-btn:hover { background:rgba(79,195,247,0.15); color:#fff; border-color:var(--accent-blue); }
+  .tab-btn.active {
+    background: linear-gradient(135deg,rgba(79,195,247,0.3),rgba(79,195,247,0.1));
+    border-color: var(--tab-active); color:#fff;
+    box-shadow: 0 0 16px rgba(79,195,247,0.3);
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    position: relative; z-index:10;
+    max-width: 960px; margin: 0 auto;
+    padding: 0 16px 60px;
+  }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── LEARN TAB ── */
+  .section-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px; padding: 22px 24px; margin-bottom:20px;
+    backdrop-filter: blur(8px);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .section-card:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(79,195,247,0.1); }
+  .section-title {
+    font-family:'Fredoka One',cursive; font-size:1.35rem;
+    color: var(--accent-yellow); margin-bottom:10px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-title .icon { font-size:1.6rem; }
+  .section-card p { font-size:0.97rem; line-height:1.7; color:#cce0f5; }
+  .section-card .fun-fact {
+    background:rgba(105,240,174,0.1); border-left:4px solid var(--accent-green);
+    border-radius:0 12px 12px 0; margin-top:12px; padding:10px 14px;
+    font-size:0.88rem; color:var(--accent-green);
+  }
+
+  /* Planet Gallery */
+  .planet-gallery-title {
+    font-family:'Fredoka One',cursive; font-size:1.5rem;
+    color:var(--accent-yellow); text-align:center; margin-bottom:18px;
+  }
+  .planet-scroll {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:14px;
+    margin-bottom:24px;
+  }
+  .planet-card {
+    background: var(--card-bg); border:1px solid var(--card-border);
+    border-radius:16px; padding:12px 8px; text-align:center;
+    cursor:pointer; transition: all 0.25s ease;
+  }
+  .planet-card:hover { transform:scale(1.07); border-color:var(--accent-yellow); box-shadow:0 6px 20px rgba(255,213,79,0.2); }
+  .planet-card img {
+    width:80px; height:80px; border-radius:50%;
+    object-fit:cover; display:block; margin:0 auto 8px;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+  .planet-card .pname {
+    font-family:'Fredoka One',cursive; font-size:0.9rem; color:var(--accent-yellow);
+  }
+  .planet-card .pdist { font-size:0.72rem; color:var(--text-dim); margin-top:2px; }
+
+  /* Planet popup */
+  .planet-popup {
+    display:none; position:fixed; inset:0; z-index:1000;
+    background:rgba(0,0,0,0.75); backdrop-filter:blur(6px);
+    align-items:center; justify-content:center;
+  }
+  .planet-popup.show { display:flex; }
+  .popup-box {
+    background: linear-gradient(135deg,#0d1a3a,#111e48);
+    border:2px solid var(--accent-yellow);
+    border-radius:24px; padding:28px; max-width:440px; width:90%;
+    text-align:center; position:relative;
+    animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn { from { transform:scale(0.7); opacity:0; } to { transform:scale(1); opacity:1; } }
+  .popup-box img { width:130px; height:130px; border-radius:50%; object-fit:cover; margin:0 auto 14px; border:3px solid var(--accent-yellow); }
+  .popup-box h2 { font-family:'Fredoka One',cursive; font-size:1.6rem; color:var(--accent-yellow); }
+  .popup-box p { font-size:0.9rem; color:#cce0f5; margin-top:8px; line-height:1.6; }
+  .popup-tag { display:inline-block; background:rgba(79,195,247,0.2); color:var(--accent-blue); border-radius:20px; padding:3px 12px; font-size:0.8rem; margin-top:6px; }
+  .popup-close {
+    position:absolute; top:12px; right:14px;
+    background:none; border:none; color:var(--text-dim);
+    font-size:1.4rem; cursor:pointer;
+  }
+
+  /* ── SIMULATE TAB ── */
+  .sim-btns {
+    display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:18px;
+  }
+  .sim-btn {
+    font-family:'Fredoka One',cursive; font-size:0.95rem;
+    background:rgba(255,255,255,0.07); border:2px solid rgba(255,255,255,0.2);
+    border-radius:30px; padding:8px 20px; color:var(--text-dim);
+    cursor:pointer; transition:all 0.2s;
+  }
+  .sim-btn.active { background:rgba(79,195,247,0.2); border-color:var(--accent-blue); color:#fff; }
+  .sim-canvas-wrap {
+    background:var(--card-bg); border:1px solid var(--card-border);
+    border-radius:20px; overflow:hidden; position:relative;
+  }
+  #simCanvas { display:block; width:100%; }
+  .sim-info {
+    background:var(--card-bg); border:1px solid var(--card-border);
+    border-radius:16px; padding:16px 20px; margin-top:14px;
+    font-size:0.9rem; color:#cce0f5; line-height:1.6;
+  }
+  .sim-info strong { color:var(--accent-yellow); font-family:'Fredoka One',cursive; }
+  .sim-controls { display:flex; gap:10px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
+  .ctrl-btn {
+    font-family:'Fredoka One',cursive; font-size:0.9rem;
+    background: linear-gradient(135deg,rgba(79,195,247,0.2),rgba(79,195,247,0.05));
+    border:2px solid var(--accent-blue); border-radius:30px;
+    padding:7px 18px; color:var(--accent-blue); cursor:pointer; transition:all 0.2s;
+  }
+  .ctrl-btn:hover { background:rgba(79,195,247,0.35); }
+
+  /* ── QUIZ TAB ── */
+  .quiz-header {
+    text-align:center; margin-bottom:22px;
+  }
+  .quiz-header h2 { font-family:'Fredoka One',cursive; font-size:1.6rem; color:var(--accent-yellow); }
+  .quiz-header p { font-size:0.9rem; color:var(--text-dim); margin-top:4px; }
+  .q-card {
+    background:var(--card-bg); border:1px solid var(--card-border);
+    border-radius:20px; padding:22px; margin-bottom:16px;
+    transition:border-color 0.3s;
+  }
+  .q-card.correct { border-color:#69f0ae; background:rgba(105,240,174,0.07); }
+  .q-card.wrong { border-color:#ff6b6b; background:rgba(255,107,107,0.07); }
+  .q-number {
+    font-family:'Fredoka One',cursive; font-size:0.8rem;
+    color:var(--accent-blue); margin-bottom:6px;
+  }
+  .q-text { font-size:1rem; font-weight:700; margin-bottom:14px; color:var(--text-light); }
+  .q-options { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  @media(max-width:500px) { .q-options { grid-template-columns:1fr; } }
+  .q-opt {
+    background:rgba(255,255,255,0.07); border:2px solid rgba(255,255,255,0.15);
+    border-radius:12px; padding:10px 14px; cursor:pointer;
+    font-size:0.9rem; transition:all 0.2s; text-align:left;
+  }
+  .q-opt:hover:not([disabled]) { background:rgba(79,195,247,0.15); border-color:var(--accent-blue); }
+  .q-opt.correct { background:rgba(105,240,174,0.2); border-color:#69f0ae; color:#69f0ae; }
+  .q-opt.wrong { background:rgba(255,107,107,0.15); border-color:#ff6b6b; color:#ff6b6b; }
+  .q-opt.reveal { background:rgba(105,240,174,0.1); border-color:#69f0ae; color:#69f0ae; }
+  .q-feedback { margin-top:10px; font-size:0.85rem; padding:8px 12px; border-radius:10px; }
+  .q-feedback.ok { background:rgba(105,240,174,0.1); color:#69f0ae; }
+  .q-feedback.no { background:rgba(255,107,107,0.1); color:#ff8a80; }
+  .quiz-score-bar {
+    background:var(--card-bg); border:1px solid var(--card-border);
+    border-radius:16px; padding:16px 20px; margin-bottom:20px;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .score-label { font-family:'Fredoka One',cursive; font-size:1rem; color:var(--accent-yellow); }
+  .score-track { flex:1; min-width:120px; background:rgba(255,255,255,0.1); border-radius:20px; height:12px; }
+  .score-fill { height:100%; border-radius:20px; background:linear-gradient(90deg,#69f0ae,#4fc3f7); transition:width 0.5s; }
+  .score-num { font-family:'Fredoka One',cursive; font-size:1rem; color:#fff; }
+
+  /* ── BOSS TAB ── */
+  .boss-header {
+    text-align:center; padding:20px 0 24px;
+  }
+  .boss-header h2 { font-family:'Fredoka One',cursive; font-size:1.7rem; color:var(--accent-orange); }
+  .boss-header p { color:var(--text-dim); font-size:0.9rem; margin-top:4px; }
+  .boss-alien {
+    font-size:4rem; animation:float 2.5s ease-in-out infinite;
+    display:block; margin-bottom:10px;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+  /* Drag-drop matching */
+  .match-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;
+  }
+  .match-col-title {
+    font-family:'Fredoka One',cursive; font-size:1rem;
+    color:var(--accent-blue); margin-bottom:8px;
+  }
+  .match-item {
+    background:var(--card-bg); border:2px solid var(--card-border);
+    border-radius:12px; padding:10px 14px; margin-bottom:8px;
+    font-size:0.88rem; cursor:grab; user-select:none;
+    transition:all 0.2s;
+  }
+  .match-item:hover { border-color:var(--accent-yellow); }
+  .match-item.dragging { opacity:0.5; }
+  .match-drop {
+    background:rgba(79,195,247,0.05); border:2px dashed rgba(79,195,247,0.3);
+    border-radius:12px; padding:10px 14px; margin-bottom:8px;
+    font-size:0.88rem; min-height:42px;
+    transition:all 0.2s; color:var(--text-dim);
+  }
+  .match-drop.over { background:rgba(79,195,247,0.15); border-color:var(--accent-blue); }
+  .match-drop.filled { background:rgba(79,195,247,0.1); border-style:solid; color:#fff; }
+  .match-drop.correct-m { border-color:#69f0ae; background:rgba(105,240,174,0.1); color:#69f0ae; }
+  .match-drop.wrong-m { border-color:#ff6b6b; background:rgba(255,107,107,0.1); color:#ff8a80; }
+
+  /* True/False */
+  .tf-card {
+    background:var(--card-bg); border:1px solid var(--card-border);
+    border-radius:18px; padding:20px; margin-bottom:14px;
+  }
+  .tf-text { font-size:0.98rem; font-weight:700; margin-bottom:12px; }
+  .tf-btns { display:flex; gap:10px; }
+  .tf-btn {
+    flex:1; padding:9px; border-radius:12px; border:2px solid rgba(255,255,255,0.2);
+    background:rgba(255,255,255,0.07); cursor:pointer;
+    font-family:'Fredoka One',cursive; font-size:1rem;
+    transition:all 0.2s;
+  }
+  .tf-btn.t:hover { border-color:#69f0ae; color:#69f0ae; }
+  .tf-btn.f:hover { border-color:#ff6b6b; color:#ff6b6b; }
+  .tf-btn.correct { background:rgba(105,240,174,0.2); border-color:#69f0ae; color:#69f0ae; }
+  .tf-btn.wrong { background:rgba(255,107,107,0.15); border-color:#ff6b6b; color:#ff6b6b; }
+  .tf-btn.reveal { background:rgba(105,240,174,0.1); border-color:#69f0ae; color:#69f0ae; }
+
+  .boss-submit {
+    display:block; margin:24px auto 0;
+    font-family:'Fredoka One',cursive; font-size:1.1rem;
+    background:linear-gradient(135deg,#ff8c42,#ffd54f);
+    color:#0a1020; border:none; border-radius:50px;
+    padding:13px 40px; cursor:pointer;
+    box-shadow:0 4px 20px rgba(255,140,66,0.4);
+    transition:transform 0.2s, box-shadow 0.2s;
+  }
+  .boss-submit:hover { transform:scale(1.04); box-shadow:0 6px 24px rgba(255,140,66,0.6); }
+
+  /* Result modal */
+  .result-modal {
+    display:none; position:fixed; inset:0; z-index:1000;
+    background:rgba(0,0,0,0.8); backdrop-filter:blur(8px);
+    align-items:center; justify-content:center;
+  }
+  .result-modal.show { display:flex; }
+  .result-box {
+    background:linear-gradient(135deg,#0d1a3a,#111e48);
+    border:3px solid var(--accent-yellow); border-radius:28px;
+    padding:34px 28px; max-width:380px; width:90%;
+    text-align:center; animation: popIn 0.4s cubic-bezier(.34,1.56,.64,1);
+  }
+  .result-emoji { font-size:4rem; margin-bottom:10px; }
+  .result-box h2 { font-family:'Fredoka One',cursive; font-size:1.7rem; color:var(--accent-yellow); }
+  .result-box p { font-size:0.95rem; color:#cce0f5; margin-top:8px; }
+  .result-xp { font-family:'Fredoka One',cursive; font-size:1.3rem; color:var(--accent-green); margin-top:10px; }
+  .result-close {
+    margin-top:20px; font-family:'Fredoka One',cursive;
+    background:linear-gradient(135deg,#4fc3f7,#2196f3);
+    border:none; border-radius:30px; padding:10px 28px;
+    color:#fff; font-size:1rem; cursor:pointer;
+    box-shadow:0 4px 14px rgba(79,195,247,0.35);
+  }
+
+  /* Responsive */
+  @media(max-width:600px) {
+    .match-grid { grid-template-columns:1fr; }
+    .planet-scroll { grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<div class="header">
+  <h1>🚀 Earth &amp; Space Explorer</h1>
+  <p>Year 5 Science — Blast off into the Solar System!</p>
+</div>
+
+<!-- XP Strip -->
+<div class="xp-strip">
+  <div class="xp-badge">⭐ <span id="xp-count">0</span> XP</div>
+  <div class="xp-bar-wrap"><div class="xp-bar-fill" id="xp-fill" style="width:0%"></div></div>
+  <div class="rank-badge" id="rank-label">🌍 Earth Cadet</div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('learn')">📚 Learn</button>
+  <button class="tab-btn" onclick="showTab('simulate')">🌌 Simulate</button>
+  <button class="tab-btn" onclick="showTab('quiz')">🎯 Quiz</button>
+  <button class="tab-btn" onclick="showTab('boss')">👾 Boss Challenge</button>
+</div>
+
+<div class="content">
+
+  <!-- ══════════════ LEARN TAB ══════════════ -->
+  <div id="tab-learn" class="tab-panel active">
+
+    <!-- Planets Gallery -->
+    <p class="planet-gallery-title">🪐 Meet the Solar System!</p>
+    <div class="planet-scroll" id="planet-gallery"></div>
+
+    <!-- Topic Cards -->
+    <div class="section-card">
+      <div class="section-title"><span class="icon">☀️</span> The Solar System</div>
+      <p>Our Solar System has one <strong style="color:var(--accent-yellow)">Sun</strong> at the centre — a giant ball of burning gas! Eight planets orbit (travel around) the Sun in oval-shaped paths called <strong style="color:var(--accent-blue)">orbits</strong>. The planets in order from the Sun are: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune.</p>
+      <div class="fun-fact">🌟 <strong>Fun Fact:</strong> It takes Earth 365¼ days to travel once around the Sun — that's one year! Mercury is the fastest: it whizzes round in just 88 days!</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title"><span class="icon">🌍</span> The Moon</div>
+      <p>The <strong style="color:var(--accent-yellow)">Moon</strong> is Earth's only natural satellite — it orbits around the Earth, not the Sun directly. The Moon takes about <strong style="color:var(--accent-blue)">27–29 days</strong> to travel once around the Earth. That's roughly one month! The Moon does not make its own light — we see it because it reflects sunlight.</p>
+      <div class="fun-fact">🌙 <strong>Fun Fact:</strong> The Moon is about 384,400 km away from Earth. If you could drive there by car, it would take about 150 days!</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title"><span class="icon">🔵</span> Spherical Bodies</div>
+      <p>The Sun, Earth, and Moon are all <strong style="color:var(--accent-yellow)">approximately spherical</strong> — that means ball-shaped! Gravity pulls everything towards the centre, which is why planets form a round shape. They're not perfectly smooth spheres though — Earth has mountains, oceans and is slightly squashed at the poles.</p>
+      <div class="fun-fact">⚽ <strong>Think about it:</strong> Gravity is like invisible glue pulling everything to the centre — just like how a ball of clay squishes into a round shape when you squeeze it from all sides!</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title"><span class="icon">🌅</span> Day, Night &amp; the Sun's Journey</div>
+      <p>The Earth <strong style="color:var(--accent-yellow)">spins (rotates)</strong> on its axis — an imaginary line through the North and South Poles. It spins once every <strong style="color:var(--accent-blue)">24 hours</strong> — that gives us day and night! The side facing the Sun gets <strong>day</strong>, while the side facing away gets <strong>night</strong>. Because Earth is spinning west-to-east, the Sun appears to rise in the <strong>east</strong> in the morning, move across the sky, and set in the <strong>west</strong> in the evening — even though it's actually Earth that's moving!</p>
+      <div class="fun-fact">🌄 <strong>Remember:</strong> The Sun doesn't really move across the sky — WE move! Earth is spinning, so it looks like the Sun is travelling from east to west every day.</div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════ SIMULATE TAB ══════════════ -->
+  <div id="tab-simulate" class="tab-panel">
+    <div class="sim-btns">
+      <button class="sim-btn active" id="simBtn1" onclick="setSimMode('solar')">🪐 Solar System</button>
+      <button class="sim-btn" id="simBtn2" onclick="setSimMode('earth')">🌍 Earth–Moon</button>
+      <button class="sim-btn" id="simBtn3" onclick="setSimMode('daynight')">🌅 Day &amp; Night</button>
+    </div>
+    <div class="sim-canvas-wrap">
+      <canvas id="simCanvas" height="380"></canvas>
+    </div>
+    <div class="sim-controls">
+      <button class="ctrl-btn" id="speedBtn" onclick="cycleSpeed()">⚡ Speed: Normal</button>
+      <button class="ctrl-btn" onclick="addXP(5); this.textContent='⭐ +5 XP! Keep Exploring!'; setTimeout(()=>this.textContent='👀 Observe & Earn XP',2000)">👀 Observe &amp; Earn XP</button>
+    </div>
+    <div class="sim-info" id="sim-info-text">
+      <strong>🪐 Solar System:</strong> Watch the planets orbit the Sun! The closer a planet is to the Sun, the faster it travels. Notice how the inner planets (Mercury, Venus, Earth, Mars) move much quicker than the giant outer planets.
+    </div>
+  </div>
+
+  <!-- ══════════════ QUIZ TAB ══════════════ -->
+  <div id="tab-quiz" class="tab-panel">
+    <div class="quiz-header">
+      <h2>🎯 Star Explorer Quiz</h2>
+      <p>Answer all questions to earn XP! Each correct answer = <strong style="color:var(--accent-yellow)">+15 XP</strong></p>
+    </div>
+    <div class="quiz-score-bar">
+      <span class="score-label">Progress:</span>
+      <div class="score-track"><div class="score-fill" id="quiz-prog" style="width:0%"></div></div>
+      <span class="score-num" id="quiz-score-num">0 / 10</span>
+    </div>
+    <div id="quiz-container"></div>
+  </div>
+
+  <!-- ══════════════ BOSS TAB ══════════════ -->
+  <div id="tab-boss" class="tab-panel">
+    <div class="boss-header">
+      <span class="boss-alien">👾</span>
+      <h2>Boss Challenge!</h2>
+      <p>Can you defeat the Space Alien? Prove you're a <strong style="color:var(--accent-orange)">Space Commander!</strong></p>
+    </div>
+
+    <!-- True/False section -->
+    <div style="margin-bottom:24px">
+      <p style="font-family:'Fredoka One',cursive; color:var(--accent-blue); font-size:1.1rem; margin-bottom:12px;">Part 1 — True or False? 🤔</p>
+      <div id="tf-container"></div>
+    </div>
+
+    <!-- Matching section -->
+    <p style="font-family:'Fredoka One',cursive; color:var(--accent-blue); font-size:1.1rem; margin-bottom:12px;">Part 2 — Match the Description! 🔗</p>
+    <div class="match-grid">
+      <div>
+        <div class="match-col-title">📋 Description</div>
+        <div id="match-drops"></div>
+      </div>
+      <div>
+        <div class="match-col-title">🔤 Word/Phrase</div>
+        <div id="match-items"></div>
+      </div>
+    </div>
+
+    <button class="boss-submit" onclick="checkBoss()">🚀 Submit &amp; Defeat the Boss!</button>
+  </div>
+
+</div><!-- /content -->
+
+<!-- Planet Popup -->
+<div class="planet-popup" id="planet-popup">
+  <div class="popup-box">
+    <button class="popup-close" onclick="closePlanetPopup()">✕</button>
+    <img id="popup-img" src="" alt="">
+    <h2 id="popup-name"></h2>
+    <span class="popup-tag" id="popup-tag"></span>
+    <p id="popup-desc"></p>
+  </div>
+</div>
+
+<!-- Result Modal -->
+<div class="result-modal" id="result-modal">
+  <div class="result-box">
+    <div class="result-emoji" id="result-emoji">🎉</div>
+    <h2 id="result-title">Brilliant!</h2>
+    <p id="result-msg"></p>
+    <div class="result-xp" id="result-xp">+0 XP Earned!</div>
+    <button class="result-close" onclick="closeResult()">Keep Exploring! 🚀</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// STARFIELD
+// ══════════════════════════════════════════
+const sc = document.getElementById('stars-canvas');
+const sx = sc.getContext('2d');
+let stars = [];
+function initStars() {
+  sc.width = window.innerWidth; sc.height = window.innerHeight;
+  stars = Array.from({length:200},()=>({
+    x:Math.random()*sc.width, y:Math.random()*sc.height,
+    r:Math.random()*1.4+0.2, a:Math.random(),
+    s:Math.random()*0.005+0.002
+  }));
+}
+function drawStars() {
+  sx.clearRect(0,0,sc.width,sc.height);
+  stars.forEach(s=>{
+    s.a += s.s; if(s.a>1||s.a<0) s.s*=-1;
+    sx.beginPath(); sx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    sx.fillStyle=`rgba(255,255,255,${s.a*0.8})`;
+    sx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+initStars(); drawStars();
+window.addEventListener('resize',initStars);
+
+// ══════════════════════════════════════════
+// XP SYSTEM
+// ══════════════════════════════════════════
+let xp = 0, xpMax = 150;
+const ranks = [
+  [0,'🌍 Earth Cadet'],[30,'🌙 Moon Ranger'],[60,'☀️ Sun Scout'],
+  [90,'🪐 Planet Pilot'],[120,'🚀 Orbit Officer'],[150,'⭐ Space Commander!']
+];
+function addXP(n){
+  xp = Math.min(xp+n, 300);
+  document.getElementById('xp-count').textContent = xp;
+  document.getElementById('xp-fill').style.width = Math.min(xp/xpMax*100,100)+'%';
+  const rank = ranks.filter(r=>xp>=r[0]).pop();
+  document.getElementById('rank-label').textContent = rank[1];
+}
+
+// ══════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════
+function showTab(id){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if(id==='simulate') startSim();
+}
+
+// ══════════════════════════════════════════
+// PLANET DATA
+// ══════════════════════════════════════════
+const planets = [
+  { name:'Sun', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg/400px-The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg',
+    dist:'Centre', tag:'⭐ Our Star',
+    desc:'The Sun is a massive ball of hot gas at the centre of our Solar System. It is so huge that about 1 million Earths could fit inside it! It gives us light and heat.', color:'#ffd54f', r:14 },
+  { name:'Mercury', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Mercury_in_true_color.jpg/400px-Mercury_in_true_color.jpg',
+    dist:'1st from Sun', tag:'🌑 Smallest Planet',
+    desc:'Mercury is the smallest planet and closest to the Sun. It has no atmosphere to trap heat, so days are scorching hot and nights are freezing cold! A year on Mercury is only 88 Earth days.', color:'#b0bec5', r:4 },
+  { name:'Venus', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Venus-real_color.jpg/400px-Venus-real_color.jpg',
+    dist:'2nd from Sun', tag:'🔥 Hottest Planet',
+    desc:'Venus is the hottest planet — even hotter than Mercury! It is covered in thick clouds of acid. It spins very slowly and in the opposite direction to most planets, so the Sun rises in the west on Venus!', color:'#ffcc80', r:7 },
+  { name:'Earth', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/400px-The_Earth_seen_from_Apollo_17.jpg',
+    dist:'3rd from Sun', tag:'🌊 Our Home!',
+    desc:'Earth is our home! It is the only planet known to have liquid water on the surface and life. Earth takes 365.25 days to orbit the Sun. It rotates once every 24 hours, giving us day and night.', color:'#4fc3f7', r:8 },
+  { name:'Mars', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/400px-OSIRIS_Mars_true_color.jpg',
+    dist:'4th from Sun', tag:'❤️ Red Planet',
+    desc:'Mars is called the Red Planet because its soil contains red rust! It has the tallest volcano in the Solar System — Olympus Mons. A day on Mars is just 37 minutes longer than an Earth day.', color:'#ef9a9a', r:6 },
+  { name:'Jupiter', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg/400px-Jupiter_and_its_shrunken_Great_Red_Spot.jpg',
+    dist:'5th from Sun', tag:'🌀 Biggest Planet',
+    desc:'Jupiter is the biggest planet — so large that all other planets could fit inside it! It has a famous storm called the Great Red Spot that has been raging for hundreds of years. Jupiter has 95 known moons!', color:'#ffb74d', r:18 },
+  { name:'Saturn', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/400px-Saturn_during_Equinox.jpg',
+    dist:'6th from Sun', tag:'💍 Ringed Planet',
+    desc:'Saturn is famous for its beautiful rings made of ice and rock. Saturn is so light that it could float on water! It has 146 known moons, including Titan which has a thick atmosphere.', color:'#fff176', r:15 },
+  { name:'Uranus', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Uranus2.jpg/400px-Uranus2.jpg',
+    dist:'7th from Sun', tag:'🧊 Ice Giant',
+    desc:'Uranus is an ice giant with a blue-green colour from methane gas. It spins on its side — tilted so much it almost rolls around the Sun! It is extremely cold at around -224°C.', color:'#80deea', r:11 },
+  { name:'Neptune', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg/400px-Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg',
+    dist:'8th from Sun', tag:'💨 Windiest Planet',
+    desc:'Neptune is the farthest planet and has the strongest winds in the Solar System — over 2,000 km/h! It takes 165 Earth years to orbit the Sun just once. It has a large storm called the Great Dark Spot.', color:'#5c6bc0', r:10 },
+  { name:'Moon', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/400px-FullMoon2010.jpg',
+    dist:"Earth's satellite", tag:'🌕 Earth\'s Moon',
+    desc:"The Moon is Earth's only natural satellite. It orbits Earth every 27–29 days. The Moon has no atmosphere, so it is covered in craters. We always see the same side of the Moon because it spins at the same rate as it orbits Earth!", color:'#e0e0e0', r:5 },
+];
+
+// Build planet gallery
+const gallery = document.getElementById('planet-gallery');
+planets.forEach((p,i)=>{
+  const card = document.createElement('div');
+  card.className='planet-card';
+  card.innerHTML=`<img src="${p.img}" alt="${p.name}" onerror="this.style.background='${p.color}';this.style.display='block'">
+    <div class="pname">${p.name}</div><div class="pdist">${p.dist}</div>`;
+  card.onclick=()=>openPlanetPopup(i);
+  gallery.appendChild(card);
+});
+
+function openPlanetPopup(i){
+  const p=planets[i];
+  document.getElementById('popup-img').src=p.img;
+  document.getElementById('popup-name').textContent=p.name;
+  document.getElementById('popup-tag').textContent=p.tag;
+  document.getElementById('popup-desc').textContent=p.desc;
+  document.getElementById('planet-popup').classList.add('show');
+  addXP(3);
+}
+function closePlanetPopup(){ document.getElementById('planet-popup').classList.remove('show'); }
+
+// ══════════════════════════════════════════
+// SIMULATION
+// ══════════════════════════════════════════
+let simMode='solar', simRunning=false, simAnimId=null, simSpeed=1, simT=0;
+const speedLevels=[1,3,6]; const speedLabels=['Normal','Fast','Turbo'];
+let speedIdx=0;
+
+function cycleSpeed(){
+  speedIdx=(speedIdx+1)%3; simSpeed=speedLevels[speedIdx];
+  document.getElementById('speedBtn').textContent='⚡ Speed: '+speedLabels[speedIdx];
+}
+function setSimMode(m){
+  simMode=m; simT=0;
+  document.querySelectorAll('.sim-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(m==='solar'?'simBtn1':m==='earth'?'simBtn2':'simBtn3').classList.add('active');
+  const info = {
+    solar:'<strong>🪐 Solar System:</strong> Watch the planets orbit the Sun! The closer a planet is to the Sun, the faster it travels. Notice how the inner planets (Mercury, Venus, Earth, Mars) move much quicker than the giant outer planets.',
+    earth:'<strong>🌍 Earth–Moon System:</strong> The Moon orbits the Earth every ~28 days. The Earth also orbits the Sun while the Moon goes around it! This is why we have months.',
+    daynight:'<strong>🌅 Day &amp; Night:</strong> Earth spins on its axis once every 24 hours. The side facing the Sun has day ☀️, while the side facing away has night 🌑. As Earth spins west to east, the Sun appears to rise in the east and set in the west!'
+  };
+  document.getElementById('sim-info-text').innerHTML=info[m];
+}
+function startSim(){
+  if(simAnimId) cancelAnimationFrame(simAnimId);
+  simRunning=true; simLoop();
+}
+
+// dist values are "base units" — scaled dynamically each frame so all 8 planets always fit
+const simPlanets=[
+  {name:'Mercury',color:'#b0bec5',r:3,  dist:26, speed:4.15},
+  {name:'Venus',  color:'#ffcc80',r:5,  dist:40, speed:1.62},
+  {name:'Earth',  color:'#4fc3f7',r:6,  dist:56, speed:1.00},
+  {name:'Mars',   color:'#ef9a9a',r:4.5,dist:72, speed:0.53},
+  {name:'Jupiter',color:'#ffb74d',r:11, dist:100,speed:0.084},
+  {name:'Saturn', color:'#fff176',r:9,  dist:126,speed:0.034,rings:true},
+  {name:'Uranus', color:'#80deea',r:7,  dist:152,speed:0.012},
+  {name:'Neptune',color:'#5c6bc0',r:6.5,dist:174,speed:0.006},
+];
+
+function simLoop(){
+  if(!simRunning) return;
+  const canvas=document.getElementById('simCanvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth; canvas.height=380;
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  simT+=0.016*simSpeed;
+
+  if(simMode==='solar'){
+    const cx=W/2, cy=H/2;
+    // Sun
+    const sg=ctx.createRadialGradient(cx,cy,2,cx,cy,20);
+    sg.addColorStop(0,'#fff7c0'); sg.addColorStop(0.5,'#ffd54f'); sg.addColorStop(1,'rgba(255,180,0,0)');
+    ctx.fillStyle=sg; ctx.beginPath(); ctx.arc(cx,cy,20,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ffd54f'; ctx.beginPath(); ctx.arc(cx,cy,14,0,Math.PI*2); ctx.fill();
+
+    // Dynamic scale: Neptune (dist=174) must fit within the canvas with margin
+    const BASE_MAX = 174;
+    const availX = cx - 22;          // horizontal headroom
+    const availY = (cy - 22) / 0.44; // vertical headroom (orbit is squished to 0.44)
+    const scale = Math.min(availX, availY) / BASE_MAX;
+
+    simPlanets.forEach(p=>{
+      const dist = p.dist * scale;
+      const angle = simT * p.speed;
+      const px = cx + dist*Math.cos(angle);
+      const py = cy + dist*Math.sin(angle)*0.44;
+      // Orbit ring
+      ctx.beginPath(); ctx.ellipse(cx,cy,dist,dist*0.44,0,0,Math.PI*2);
+      ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1; ctx.stroke();
+      // Saturn rings (drawn behind planet)
+      if(p.rings){
+        ctx.save();
+        ctx.translate(px,py); ctx.rotate(0.3);
+        ctx.beginPath(); ctx.ellipse(0,0,p.r*2.5,p.r*0.55,0,0,Math.PI*2);
+        ctx.strokeStyle='rgba(255,240,150,0.55)'; ctx.lineWidth=3; ctx.stroke();
+        ctx.restore();
+      }
+      // Planet body
+      ctx.beginPath(); ctx.arc(px,py,p.r,0,Math.PI*2);
+      ctx.fillStyle=p.color; ctx.fill();
+      // Label
+      ctx.fillStyle='rgba(255,255,255,0.75)'; ctx.font=`${W>480?'10':'9'}px Nunito`;
+      ctx.textAlign='center'; ctx.fillText(p.name,px,py-p.r-3);
+    });
+
+  } else if(simMode==='earth'){
+    // ── Sun at the CENTRE; Earth orbits Sun; Moon orbits Earth ──
+    const cx=W/2, cy=H/2;
+
+    // Earth orbit dimensions — fit snugly inside canvas
+    const eOrbitX = Math.min(cx - 48, 200);  // semi-major axis (horizontal)
+    const eOrbitY = eOrbitX * 0.52;           // semi-minor axis (slight ellipse)
+    const moonR   = Math.max(32, eOrbitX * 0.18); // Moon orbit radius scales too
+
+    // Earth orbit path
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, eOrbitX, eOrbitY, 0, 0, Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1; ctx.setLineDash([4,6]);
+    ctx.stroke(); ctx.setLineDash([]);
+
+    // Earth position (orbits the Sun at centre)
+    const ea = simT * 0.28;
+    const ex = cx + eOrbitX * Math.cos(ea);
+    const ey = cy + eOrbitY * Math.sin(ea);
+
+    // Moon orbit path (centred on Earth, drawn before Moon so it's behind)
+    ctx.beginPath();
+    ctx.arc(ex, ey, moonR, 0, Math.PI*2);
+    ctx.strokeStyle='rgba(200,200,255,0.18)'; ctx.lineWidth=1; ctx.setLineDash([3,5]);
+    ctx.stroke(); ctx.setLineDash([]);
+
+    // ── SUN at canvas centre ──
+    const sunGlow = ctx.createRadialGradient(cx,cy,4,cx,cy,52);
+    sunGlow.addColorStop(0,'rgba(255,250,180,0.55)');
+    sunGlow.addColorStop(1,'rgba(255,180,0,0)');
+    ctx.fillStyle=sunGlow; ctx.beginPath(); ctx.arc(cx,cy,52,0,Math.PI*2); ctx.fill();
+    // Rotating rays
+    for(let i=0;i<10;i++){
+      const a = i/10*Math.PI*2 + simT*0.15;
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(a)*20, cy+Math.sin(a)*20);
+      ctx.lineTo(cx+Math.cos(a)*42, cy+Math.sin(a)*42);
+      ctx.strokeStyle='rgba(255,220,80,0.4)'; ctx.lineWidth=2.5; ctx.stroke();
+    }
+    ctx.fillStyle='#ffd54f'; ctx.beginPath(); ctx.arc(cx,cy,18,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.font='bold 12px Nunito'; ctx.textAlign='center';
+    ctx.fillText('☀️ Sun',cx,cy+32);
+
+    // ── EARTH ──
+    // Blue base
+    ctx.fillStyle='#4fc3f7'; ctx.beginPath(); ctx.arc(ex,ey,12,0,Math.PI*2); ctx.fill();
+    // Green landmass blob
+    ctx.fillStyle='#388e3c';
+    ctx.beginPath(); ctx.ellipse(ex+2,ey-2,6,5,ea,0,Math.PI*2); ctx.fill();
+    // White cloud wisp
+    ctx.fillStyle='rgba(255,255,255,0.45)';
+    ctx.beginPath(); ctx.ellipse(ex-3,ey+3,5,3,ea+1,0,Math.PI*2); ctx.fill();
+    // Label
+    ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.font='bold 11px Nunito'; ctx.textAlign='center';
+    ctx.fillText('🌍 Earth',ex,ey-16);
+
+    // ── MOON ──
+    const ma = simT * 2.4;
+    const mx = ex + moonR * Math.cos(ma);
+    const my = ey + moonR * Math.sin(ma);
+    ctx.fillStyle='#cfd8dc'; ctx.beginPath(); ctx.arc(mx,my,6,0,Math.PI*2); ctx.fill();
+    // Small craters
+    ctx.fillStyle='rgba(0,0,0,0.2)';
+    ctx.beginPath(); ctx.arc(mx+2,my-1,1.8,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(mx-1,my+2,1.2,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(200,210,220,0.8)'; ctx.font='10px Nunito'; ctx.textAlign='center';
+    ctx.fillText('🌕 Moon',mx,my-10);
+
+  } else {
+    // Day/Night — Sun is STATIONARY on the RIGHT; Earth spins; day side always faces the Sun
+    const cx=W/2, cy=H/2;
+    // Deep space background
+    ctx.fillStyle='#020820'; ctx.fillRect(0,0,W,H);
+
+    // ── SUN (right side, stationary) ──
+    const sunX = W - 75, sunY = cy;
+    // Soft glow
+    const glow = ctx.createRadialGradient(sunX,sunY,10,sunX,sunY,80);
+    glow.addColorStop(0,'rgba(255,240,100,0.35)');
+    glow.addColorStop(1,'rgba(255,200,0,0)');
+    ctx.fillStyle=glow; ctx.beginPath(); ctx.arc(sunX,sunY,80,0,Math.PI*2); ctx.fill();
+    // Rays
+    for(let i=0;i<12;i++){
+      const a=i/12*Math.PI*2 + simT*0.2;
+      const x1=sunX+Math.cos(a)*30, y1=sunY+Math.sin(a)*30;
+      const x2=sunX+Math.cos(a)*58, y2=sunY+Math.sin(a)*58;
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+      ctx.strokeStyle='rgba(255,220,80,0.45)'; ctx.lineWidth=2.5; ctx.stroke();
+    }
+    ctx.fillStyle='#ffd54f'; ctx.beginPath(); ctx.arc(sunX,sunY,28,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.font='bold 13px Nunito'; ctx.textAlign='center';
+    ctx.fillText('☀️ SUN',sunX,sunY+46);
+    ctx.fillStyle='rgba(255,213,79,0.6)'; ctx.font='10px Nunito';
+    ctx.fillText('(stationary)',sunX,sunY+60);
+
+    // ── SUNLIGHT RAYS across the canvas ──
+    for(let i=0;i<5;i++){
+      const yOff = (i-2)*28;
+      ctx.beginPath(); ctx.moveTo(sunX-28, sunY+yOff);
+      ctx.lineTo(cx+90, sunY+yOff+(i-2)*10);
+      ctx.strokeStyle=`rgba(255,240,100,${0.04+i*0.01})`; ctx.lineWidth=18; ctx.stroke();
+    }
+
+    // ── EARTH ──
+    const er = Math.min(75, cy-30);
+    const NIGHT_COLOR = '#1a237e', DAY_COLOR = '#4fc3f7';
+
+    // Base = full night (dark)
+    ctx.beginPath(); ctx.arc(cx,cy,er,0,Math.PI*2);
+    ctx.fillStyle=NIGHT_COLOR; ctx.fill();
+
+    // Day side = RIGHT half of Earth (angles -π/2 → +π/2, the half facing the Sun on the right)
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,er,-Math.PI/2, Math.PI/2, false);
+    ctx.closePath();
+    ctx.fillStyle=DAY_COLOR; ctx.fill();
+
+    // Soft terminator blend at the day/night boundary
+    const term = ctx.createLinearGradient(cx-er*0.3,cy,cx+er*0.3,cy);
+    term.addColorStop(0,'rgba(10,15,60,0.0)');
+    term.addColorStop(0.4,'rgba(10,15,60,0.7)');
+    term.addColorStop(0.6,'rgba(10,15,60,0.0)');
+    ctx.beginPath(); ctx.arc(cx,cy,er,0,Math.PI*2);
+    ctx.fillStyle=term; ctx.fill();
+
+    // Thin outline
+    ctx.beginPath(); ctx.arc(cx,cy,er,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1.5; ctx.stroke();
+
+    // ── SPINNING CITY DOT ──
+    // cityA increases over time (Earth spinning); city sweeps around Earth
+    const cityA = simT * 0.45;
+    const cityX = cx + er*0.82*Math.cos(cityA);
+    const cityY = cy + er*0.82*Math.sin(cityA);
+    // Day if city is on the right half (positive x from center)
+    const isDay = cityX > cx;
+    ctx.fillStyle = isDay ? '#ffd54f' : '#7986cb';
+    ctx.beginPath(); ctx.arc(cityX,cityY,5,0,Math.PI*2); ctx.fill();
+    // Label above dot
+    ctx.font='bold 11px Nunito'; ctx.textAlign='center';
+    ctx.fillStyle = isDay ? '#ffd54f' : '#90caf9';
+    ctx.fillText(isDay ? '☀️ Day!' : '🌙 Night!', cityX, cityY-13);
+
+    // ── ROTATION ARROW (top of Earth) ──
+    ctx.strokeStyle='rgba(255,255,255,0.35)'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(cx,cy,er+14,-Math.PI*0.85,-Math.PI*0.15,false); ctx.stroke();
+    // Arrowhead
+    const arA=-Math.PI*0.15;
+    const arX=cx+(er+14)*Math.cos(arA), arY=cy+(er+14)*Math.sin(arA);
+    ctx.fillStyle='rgba(255,255,255,0.5)';
+    ctx.beginPath();
+    ctx.moveTo(arX,arY);
+    ctx.lineTo(arX-7*Math.cos(arA-0.45),arY-7*Math.sin(arA-0.45));
+    ctx.lineTo(arX-7*Math.cos(arA+0.45),arY-7*Math.sin(arA+0.45));
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='10px Nunito'; ctx.textAlign='center';
+    ctx.fillText('spinning →',cx,cy-er-18);
+
+    // ── SIDE LABELS ──
+    ctx.font='bold 12px Nunito'; ctx.textAlign='center';
+    ctx.fillStyle='rgba(144,164,174,0.8)'; ctx.fillText('🌙 NIGHT SIDE',cx-er*0.62,cy+er+20);
+    ctx.fillStyle='rgba(79,195,247,0.8)';  ctx.fillText('☀️ DAY SIDE', cx+er*0.62,cy+er+20);
+    ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font='11px Nunito';
+    ctx.fillText('EARTH',cx,cy+er+36);
+  }
+
+  simAnimId=requestAnimationFrame(simLoop);
+}
+
+// ══════════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════════
+const quizQ=[
+  {q:'What is at the centre of our Solar System?', opts:['The Earth','The Moon','The Sun','Jupiter'], ans:2},
+  {q:'How long does Earth take to orbit the Sun?', opts:['24 hours','28 days','365 days','1000 days'], ans:2},
+  {q:'How long does Earth take to spin once on its axis?', opts:['1 hour','12 hours','24 hours','7 days'], ans:2},
+  {q:'Why do we have day and night?', opts:['The Sun moves around Earth','Earth orbits the Moon','Earth spins on its axis','The Moon blocks the Sun'], ans:2},
+  {q:'In which direction does the Sun appear to rise each morning?', opts:['North','South','West','East'], ans:3},
+  {q:'How long does the Moon take to orbit the Earth?', opts:['24 hours','7 days','About 28 days','365 days'], ans:2},
+  {q:'What shape are the Sun, Earth, and Moon?', opts:['Flat and disc-like','Cube-shaped','Approximately spherical','Pyramid-shaped'], ans:2},
+  {q:'Which planet is the largest in our Solar System?', opts:['Saturn','Earth','Jupiter','Uranus'], ans:2},
+  {q:'What does the Moon reflect to make it visible at night?', opts:['Heat from Earth','Its own light','Sunlight','Starlight'], ans:2},
+  {q:'Which planet is closest to the Sun?', opts:['Venus','Mars','Earth','Mercury'], ans:3},
+];
+
+let quizAnswered=0;
+function buildQuiz(){
+  const con=document.getElementById('quiz-container');
+  con.innerHTML='';
+  quizQ.forEach((q,qi)=>{
+    const card=document.createElement('div');
+    card.className='q-card'; card.id='qc-'+qi;
+    card.innerHTML=`<div class="q-number">Question ${qi+1} of ${quizQ.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="q-options">
+        ${q.opts.map((o,oi)=>`<button class="q-opt" id="qo-${qi}-${oi}" onclick="answerQ(${qi},${oi})">${o}</button>`).join('')}
+      </div>
+      <div class="q-feedback" id="qf-${qi}" style="display:none"></div>`;
+    con.appendChild(card);
+  });
+}
+function answerQ(qi,oi){
+  const q=quizQ[qi];
+  const card=document.getElementById('qc-'+qi);
+  if(card.classList.contains('correct')||card.classList.contains('wrong')) return;
+  q.opts.forEach((_,i)=>{
+    const btn=document.getElementById(`qo-${qi}-${i}`);
+    btn.disabled=true;
+    if(i===q.ans) btn.classList.add(oi===q.ans?'correct':'reveal');
+    if(i===oi&&oi!==q.ans) btn.classList.add('wrong');
+  });
+  const fb=document.getElementById('qf-'+qi);
+  fb.style.display='block';
+  if(oi===q.ans){
+    card.classList.add('correct');
+    fb.className='q-feedback ok'; fb.textContent='✅ Excellent! That\'s correct!';
+    addXP(15); quizAnswered++;
+  } else {
+    card.classList.add('wrong');
+    fb.className='q-feedback no'; fb.textContent='❌ Not quite! The correct answer is: '+q.opts[q.ans];
+    quizAnswered++;
+  }
+  updateQuizScore();
+}
+function updateQuizScore(){
+  const correct=document.querySelectorAll('.q-card.correct').length;
+  document.getElementById('quiz-prog').style.width=(quizAnswered/quizQ.length*100)+'%';
+  document.getElementById('quiz-score-num').textContent=correct+' / '+quizAnswered+' answered';
+  if(quizAnswered===quizQ.length){
+    setTimeout(()=>showResult(correct,quizQ.length,'quiz'),500);
+  }
+}
+buildQuiz();
+
+// ══════════════════════════════════════════
+// BOSS CHALLENGE
+// ══════════════════════════════════════════
+const tfQ=[
+  {text:'The Sun is at the centre of our Solar System.', ans:true},
+  {text:'Earth takes 28 days to orbit the Sun.', ans:false},
+  {text:'The Moon creates its own light.', ans:false},
+  {text:'Earth spinning on its axis causes day and night.', ans:true},
+  {text:'The Sun appears to move because Earth is spinning.', ans:true},
+];
+const matchPairs=[
+  {desc:'Takes 365 days to orbit the Sun', word:'Earth'},
+  {desc:'Earth\'s natural satellite', word:'The Moon'},
+  {desc:'Giant ball of burning gas at the centre', word:'The Sun'},
+  {desc:'Explains why we see day and night', word:'Earth\'s rotation'},
+  {desc:'Ball-shaped like a sphere', word:'Approximately spherical'},
+];
+
+let tfAnswers={}, dragItem=null;
+const dropAnswers={};
+
+function buildBoss(){
+  // TF
+  const tfc=document.getElementById('tf-container');
+  tfQ.forEach((q,i)=>{
+    const d=document.createElement('div'); d.className='tf-card';
+    d.innerHTML=`<div class="tf-text">${i+1}. ${q.text}</div>
+      <div class="tf-btns">
+        <button class="tf-btn t" id="tf-t-${i}" onclick="answerTF(${i},true)">✅ True</button>
+        <button class="tf-btn f" id="tf-f-${i}" onclick="answerTF(${i},false)">❌ False</button>
+      </div><div id="tf-fb-${i}" style="margin-top:6px;font-size:0.82rem;color:var(--text-dim)"></div>`;
+    tfc.appendChild(d);
+  });
+  // Match
+  const drops=document.getElementById('match-drops');
+  const items=document.getElementById('match-items');
+  const shuffled=[...matchPairs].sort(()=>Math.random()-0.5);
+  shuffled.forEach((p,i)=>{
+    const dr=document.createElement('div'); dr.className='match-drop';
+    dr.dataset.answer=p.word; dr.id='drop-'+i;
+    dr.textContent=p.desc;
+    dr.addEventListener('dragover',e=>{e.preventDefault();dr.classList.add('over');});
+    dr.addEventListener('dragleave',()=>dr.classList.remove('over'));
+    dr.addEventListener('drop',e=>{
+      e.preventDefault(); dr.classList.remove('over');
+      const word=e.dataTransfer.getData('text');
+      dr.dataset.filled=word;
+      dr.classList.add('filled');
+      dr.innerHTML=`<span style="color:var(--accent-yellow);font-weight:700">${word}</span><br><span style="font-size:0.8em;color:var(--text-dim)">${p.desc}</span>`;
+    });
+    drops.appendChild(dr);
+  });
+  matchPairs.forEach(p=>{
+    const it=document.createElement('div'); it.className='match-item';
+    it.textContent=p.word; it.draggable=true;
+    it.addEventListener('dragstart',e=>{e.dataTransfer.setData('text',p.word); it.classList.add('dragging');});
+    it.addEventListener('dragend',()=>it.classList.remove('dragging'));
+    items.appendChild(it);
+  });
+}
+function answerTF(i,val){
+  if(tfAnswers.hasOwnProperty(i)) return;
+  tfAnswers[i]=val;
+  const q=tfQ[i];
+  const correct=val===q.ans;
+  const tb=document.getElementById('tf-t-'+i), fb2=document.getElementById('tf-f-'+i);
+  tb.disabled=true; fb2.disabled=true;
+  if(val){
+    tb.classList.add(correct?'correct':'wrong');
+    if(!correct) fb2.classList.add('reveal');
+  } else {
+    fb2.classList.add(correct?'correct':'wrong');
+    if(!correct) tb.classList.add('reveal');
+  }
+  document.getElementById('tf-fb-'+i).textContent=correct?'✅ Correct!':'❌ The answer is: '+(q.ans?'True':'False');
+}
+function checkBoss(){
+  // TF score
+  let score=0, total=tfQ.length+matchPairs.length;
+  tfQ.forEach((q,i)=>{ if(tfAnswers[i]===q.ans) score++; });
+  // Match score
+  document.querySelectorAll('.match-drop').forEach(dr=>{
+    const filled=dr.dataset.filled, expected=dr.dataset.answer;
+    if(filled===expected){ score++; dr.classList.add('correct-m'); }
+    else if(filled){ dr.classList.add('wrong-m'); }
+    else { dr.style.borderColor='#ff6b6b'; }
+  });
+  showResult(score,total,'boss');
+}
+buildBoss();
+
+// ══════════════════════════════════════════
+// RESULT MODAL
+// ══════════════════════════════════════════
+function showResult(score,total,type){
+  const pct=score/total;
+  let emoji,title,msg,xpGain;
+  if(pct>=0.9){ emoji='🚀'; title='Space Commander!'; msg=`Amazing! You scored ${score}/${total}. You're a true space expert!`; xpGain=50; }
+  else if(pct>=0.7){ emoji='⭐'; title='Brilliant!'; msg=`Great work! You scored ${score}/${total}. Keep exploring!`; xpGain=35; }
+  else if(pct>=0.5){ emoji='🌙'; title='Good Try!'; msg=`You scored ${score}/${total}. Review the Learn section and try again!`; xpGain=20; }
+  else { emoji='🌍'; title='Keep Practising!'; msg=`You scored ${score}/${total}. Go back to Learn and have another go!`; xpGain=10; }
+  document.getElementById('result-emoji').textContent=emoji;
+  document.getElementById('result-title').textContent=title;
+  document.getElementById('result-msg').textContent=msg;
+  document.getElementById('result-xp').textContent='+'+xpGain+' XP Earned!';
+  document.getElementById('result-modal').classList.add('show');
+  addXP(xpGain);
+}
+function closeResult(){ document.getElementById('result-modal').classList.remove('show'); }
+</script>
+</body>
+</html>
